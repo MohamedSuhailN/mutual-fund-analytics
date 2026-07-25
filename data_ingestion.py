@@ -22,38 +22,50 @@ def explore_all_raw_csvs():
 
 def validate_fund_master_and_amfi():
     print("\n================ 2. FUND MASTER & AMFI VALIDATION ================")
-    master_path = "data/raw/fund_master.csv"
-    history_path = "data/raw/nav_history.csv"
+
+    # Handle prefixed file names (01_fund_master.csv, 02_nav_history.csv)
+    master_path = (
+        "data/raw/01_fund_master.csv"
+        if os.path.exists("data/raw/01_fund_master.csv")
+        else "data/raw/fund_master.csv"
+    )
+    history_path = (
+        "data/raw/02_nav_history.csv"
+        if os.path.exists("data/raw/02_nav_history.csv")
+        else "data/raw/nav_history.csv"
+    )
 
     if not os.path.exists(master_path) or not os.path.exists(history_path):
-        print(
-            "Note: Please ensure 'fund_master.csv' and 'nav_history.csv' are placed in 'data/raw/'."
-        )
+        print("Note: Could not find fund master or nav history CSV files.")
         return
 
     fund_master = pd.read_csv(master_path)
     nav_history = pd.read_csv(history_path)
 
-    # Print unique fields
+    # Print unique master fields
     for col in ["fund_house", "category", "sub_category", "risk_grade"]:
         if col in fund_master.columns:
             print(f"Unique {col}: {fund_master[col].unique()}")
 
     # AMFI Code Validation
-    master_codes = set(fund_master["scheme_code"].unique())
-    history_codes = set(nav_history["scheme_code"].unique())
+    if (
+        "scheme_code" in fund_master.columns
+        and "scheme_code" in nav_history.columns
+    ):
+        master_codes = set(fund_master["scheme_code"].unique())
+        history_codes = set(nav_history["scheme_code"].unique())
 
-    missing_codes = master_codes - history_codes
+        missing_codes = master_codes - history_codes
 
-    print("\n--- DATA QUALITY SUMMARY ---")
-    if missing_codes:
-        print(
-            f"WARNING: Found {len(missing_codes)} scheme codes in fund_master that are missing in nav_history."
-        )
-    else:
-        print(
-            "SUCCESS: All AMFI scheme codes in fund_master exist in nav_history!"
-        )
+        print("\n--- DATA QUALITY SUMMARY ---")
+        if missing_codes:
+            print(
+                f"WARNING: Found {len(missing_codes)} scheme codes in fund_master missing from nav_history."
+            )
+        else:
+            print(
+                "SUCCESS: All AMFI scheme codes in fund_master exist in nav_history!"
+            )
 
 
 if __name__ == "__main__":
