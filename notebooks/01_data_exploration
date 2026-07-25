@@ -1,0 +1,75 @@
+import os
+from pathlib import Path
+import pandas as pd
+
+# Define the directory where your 10 CSVs are stored
+raw_data_path = Path("https://api.mfapi.in/mf/125497")
+
+# Find all CSV files in the raw data folder
+csv_files = sorted(list(raw_data_path.glob("*.csv")))
+
+if not csv_files:
+    print("❌ No CSV files found in 'data/raw/'. Make sure your 10 files are saved there!")
+else:
+    print(f"📁 Found {len(csv_files)} CSV file(s) in 'data/raw/':\n")
+
+    datasets = {}
+
+    for file_path in csv_files:
+        filename = file_path.name
+        print("=" * 80)
+        print(f"📄 DATASET: {filename}")
+        print("=" * 80)
+
+        try:
+            # Load CSV into Pandas
+            df = pd.read_csv(file_path)
+            datasets[filename] = df
+
+            # 1. Shape
+            print(f"📐 Shape: {df.shape} ({df.shape[0]} rows, {df.shape[1]} columns)")
+
+            # 2. Data Types
+            print("\n📋 Data Types (.dtypes):")
+            print(df.dtypes)
+
+            # 3. Head
+            print("\n🔍 First 5 Rows (.head()):")
+            display(df.head())
+
+            # 4. Anomaly Inspection
+            print("\n⚠️ Anomaly Check Report:")
+            anomalies = []
+
+            # Empty dataset check
+            if df.empty:
+                anomalies.append("Dataset is completely empty.")
+
+            # Missing values check
+            null_sum = df.isnull().sum()
+            nulls_exist = null_sum[null_sum > 0]
+            if not nulls_exist.empty:
+                null_dict = nulls_exist.to_dict()
+                anomalies.append(f"Missing Values: {null_dict}")
+
+            # Duplicate rows check
+            dup_count = df.duplicated().sum()
+            if dup_count > 0:
+                anomalies.append(f"Duplicate Rows: {dup_count} duplicated row(s)")
+
+            # Unnamed index column artifact check (common when saving without index=False)
+            unnamed_cols = [c for c in df.columns if "Unnamed" in c]
+            if unnamed_cols:
+                anomalies.append(f"Possible index artifact column(s): {unnamed_cols}")
+
+            # Print anomaly status
+            if anomalies:
+                for a in anomalies:
+                    print(f"  • {a}")
+            else:
+                print("  • No missing values, duplicates, or extra index columns detected.")
+
+        except Exception as e:
+            print(f"❌ Error loading {filename}: {e}")
+
+        print("\n" + "-" * 80 + "\n")
