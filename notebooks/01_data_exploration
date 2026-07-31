@@ -9,16 +9,16 @@ raw_data_path = Path("https://api.mfapi.in/mf/125497")
 csv_files = sorted(list(raw_data_path.glob("*.csv")))
 
 if not csv_files:
-    print("❌ No CSV files found in 'data/raw/'. Make sure your 10 files are saved there!")
+    print("No CSV files found in 'data/raw/'. Make sure your 10 files are saved there!")
 else:
-    print(f"📁 Found {len(csv_files)} CSV file(s) in 'data/raw/':\n")
+    print(f"Found {len(csv_files)} CSV file(s) in 'data/raw/':\n")
 
     datasets = {}
 
     for file_path in csv_files:
         filename = file_path.name
         print("=" * 80)
-        print(f"📄 DATASET: {filename}")
+        print(f" DATASET: {filename}")
         print("=" * 80)
 
         try:
@@ -27,18 +27,18 @@ else:
             datasets[filename] = df
 
             # 1. Shape
-            print(f"📐 Shape: {df.shape} ({df.shape[0]} rows, {df.shape[1]} columns)")
+            print(f" Shape: {df.shape} ({df.shape[0]} rows, {df.shape[1]} columns)")
 
             # 2. Data Types
-            print("\n📋 Data Types (.dtypes):")
+            print("\n Data Types (.dtypes):")
             print(df.dtypes)
 
             # 3. Head
-            print("\n🔍 First 5 Rows (.head()):")
+            print("\n First 5 Rows (.head()):")
             display(df.head())
 
             # 4. Anomaly Inspection
-            print("\n⚠️ Anomaly Check Report:")
+            print("\n Anomaly Check Report:")
             anomalies = []
 
             # Empty dataset check
@@ -70,6 +70,6 @@ else:
                 print("  • No missing values, duplicates, or extra index columns detected.")
 
         except Exception as e:
-            print(f"❌ Error loading {filename}: {e}")
+            print(f" Error loading {filename}: {e}")
 
         print("\n" + "-" * 80 + "\n")
